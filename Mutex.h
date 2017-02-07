@@ -8,7 +8,7 @@
 
 #include <pthread.h>
 
- namespace servant 
+namespace servant 
 {
 
 class Mutex

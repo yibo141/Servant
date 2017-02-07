@@ -6,7 +6,7 @@
 #ifndef EVENTLOOP_H
 #define EVENTLOOP_H
 
-#include <syscall.h>
+#include <sys/syscall.h>
 #include <sys/types.h>
 #include <assert.h>
 

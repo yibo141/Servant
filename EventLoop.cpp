@@ -13,7 +13,7 @@ namespace servant
 
 EventLoop::EventLoop()
     :isLooping(false),
-     threadId(CurrentThread::gettid());
+     threadId(CurrentThread::gettid())
 { }
 
 EventLoop::~EventLoop()

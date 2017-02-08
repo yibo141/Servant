@@ -3,6 +3,7 @@
  * E-mail: yibo141@outlook.com
  */
 
+#include <sys/epoll.h>
 #include "Event.h"
 
 namespace servant
@@ -21,4 +22,9 @@ void Event::handleEvent()
             errorCallback();
 }
 
+void Event::update()
+{
+    // TODO
 }
+
+} // namespace servant

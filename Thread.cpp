@@ -25,4 +25,4 @@ int Thread::join()
     return pthread_join(pthreadId, NULL);
 }
 
-}
+} // namespace servant

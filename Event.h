@@ -9,6 +9,8 @@
 namespace servant
 {
 
+class EventLoop;
+
 class Event 
 {
 public:
@@ -28,11 +30,29 @@ public:
     { writeCallback = cb; }
     void setErrorCallback(const Callback &cb)
     { errorCallback = cb; }
+
+    void enableRead()
+    {
+        event |= (POLLIN | POLLPRI);
+        update();
+    }
+    void enableWrite()
+    {
+        event |= POLLOUT;
+        update();
+    }
+    void disableWrite()
+    {
+        event &= ~POLLOUT;
+        update();
+    }
     
     int fd() const 
     { return fd; }
     
 private:
+    void update();
+    
     EventLoop *loop;
     const int fd;
     int events;

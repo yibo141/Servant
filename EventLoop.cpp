@@ -31,4 +31,4 @@ void EventLoop::loop()
     isLooping = false;
 }
 
-}
+} // namespace servant

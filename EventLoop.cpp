@@ -5,8 +5,24 @@
 
 #include <assert.h>
 #include <poll.h>
+#include <signal.h>
 #include "CurrentThread.h"
 #include "EventLoop.h"
+
+namespace 
+{
+    class IgnoreSigPipe
+    {
+    public:
+        IgnoreSigPipe()
+        {
+            ::signal(SIGPIPE, SIG_IGN);
+        }
+    };
+
+    // 忽略SIGPIPE信号
+    IgnoreSigPipe initObj;
+}
 
 namespace servant
 {

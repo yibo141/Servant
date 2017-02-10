@@ -11,15 +11,14 @@ namespace servant
 
 class EventLoop;
 
-class Event 
+class EventHandler
 {
 public:
     typedef void (*Callback)();
-    Event(EventLoop *loop, const int fd)
+    EventHandler(EventLoop *loop, const int fd, int event)
         :this->loop(loop),
          this->fd(fd),
-         events(0),
-         revents(0)
+         revents(event)
     { }
 
     void handleEvent();
@@ -33,17 +32,17 @@ public:
 
     void enableRead()
     {
-        event |= (POLLIN | POLLPRI);
+        revents |= (POLLIN | POLLPRI);
         update();
     }
     void enableWrite()
     {
-        event |= POLLOUT;
+        revents |= POLLOUT;
         update();
     }
     void disableWrite()
     {
-        event &= ~POLLOUT;
+        revents &= ~POLLOUT;
         update();
     }
     
@@ -55,7 +54,6 @@ private:
     
     EventLoop *loop;
     const int fd;
-    int events;
     int revents;
 
     Callback readCallback;

@@ -4,12 +4,12 @@
  */
 
 #include <sys/epoll.h>
-#include "Event.h"
+#include "EventHandler.h"
 
 namespace servant
 {
 
-void Event::handleEvent()
+void EventHandler::handleEvent()
 {
     if(revents & (POLLIN | POLLPRI | POLLRDHUP))
         if(readCallback)
@@ -22,7 +22,7 @@ void Event::handleEvent()
             errorCallback();
 }
 
-void Event::update()
+void EventHandler::update()
 {
     // TODO
 }

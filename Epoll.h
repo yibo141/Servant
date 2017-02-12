@@ -9,14 +9,15 @@
 #include <sys/epoll.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 #include <iostream>
 #include <vector>
-#include "EventHandler.h"
+#include "EventLoop.h"
 
 namespace servant
 {
 
-class EventLoop;
+class Event;
 
 class Epoll 
 {
@@ -36,25 +37,23 @@ public:
     { ::close(epollfd); }
 
     // 调用epoll_wait，并将其交给Event类的handleEvent函数处理
-    void epoll();
+    void epoll(std::vector<Event*> &events);
 
     // 修改epoll监听的事件
-    void updateHandler(EventHandler &eh);
-    void removeHandler(const EventHandler &eh);
+    void updateEvent(Event &ev);
+    void removeEvent(const Event &ev);
 
     void assertInLoopThread() const 
     {
         ownerLoop->assertInLoopThread();
     }
-
+    void updateEvent(Event *ev);
 private:
-    void update();
-    void callHandler();
     
     EventLoop *ownerLoop;
     int epollfd;
     std::vector<struct epoll_event> retEvents;
-    std::vector<EventHandler> handlers;
+    // std::vector<Event> events;
 };
 
 }

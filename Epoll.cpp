@@ -3,13 +3,14 @@
  * E-mail: yibo141@outlook.com
  */
 
+#include <sys/epoll.h>
 #include "Epoll.h"
-#include "EventHandler.h"
+#include "Event.h"
 
 namespace servant   
 {
 
-void Epoll::epoll()
+void Epoll::epoll(std::vector<Event*> &activeEvents)
 {
     int numEvents = ::epoll_wait(epollfd,
                                  retEvents.data(),
@@ -29,38 +30,23 @@ void Epoll::epoll()
     }
     else 
     {
-        if(numEvents == events.size())
+        if(numEvents == retEvents.size())
             retEvents.resize(1.5 * numEvents);
         for(int i = 0; i < numEvents; ++i) 
         {
-            EventHandler eh(ownerLoop, retEvents[i].data.fd, retEvents[i].events);
-            handlers.push_back(eh);
-            callHandler();
+            Event *ev = new Event(ownerLoop, retEvents[i].data.fd);
+            ev->setRetEvents(retEvents[i].events);
+            activeEvents.push_back(ev);
         }
     }
 }
 
-void Epoll::updateHandler(EventHandler &eh)
+void Epoll::updateEvent(Event *ev)
 {
-    // TODO
-}
-
-void Epoll::removeHandler(const EventHandler &eh)
-{
-    // TODO
-}
-
-void Epoll::update()
-{
-    // TODO
-}
-
-void Epoll::callHandler()
-{
-    for(const EventHandler &handler : handlers)
-    {
-        handler.handleEvent();
-    }
+    epoll_event event;
+    event.data.fd = ev->getFd();
+    event.events = ev->getEvents();
+    ::epoll_ctl(epollfd, EPOLL_CTL_ADD, ev->getFd(), &event);
 }
 
 } // namespace servant

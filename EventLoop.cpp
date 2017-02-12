@@ -6,8 +6,11 @@
 #include <assert.h>
 #include <poll.h>
 #include <signal.h>
+#include <assert.h>
 #include "CurrentThread.h"
 #include "EventLoop.h"
+#include "Event.h"
+#include "Epoll.h"
 
 namespace 
 {
@@ -29,7 +32,9 @@ namespace servant
 
 EventLoop::EventLoop()
     :isLooping(false),
-     threadId(CurrentThread::gettid())
+     threadId(CurrentThread::gettid()),
+     isQuit(false),
+     e(new Epoll(this))
 { }
 
 EventLoop::~EventLoop()
@@ -42,9 +47,31 @@ void EventLoop::loop()
     assert(!isLooping);
     assertInLoopThread();
     isLooping = true;
+    isQuit = false;
 
-    ::poll(NULL, 0, 5*1000);
+    while(!isQuit)
+    {
+        activeEvents.clear();
+        e->epoll(activeEvents);
+        for(std::vector<Event*>:: iterator iter = activeEvents.begin();
+            iter != activeEvents.end(); ++iter)
+        {
+            (*iter)->handleEvent();
+        }
+    }
     isLooping = false;
+}
+
+void EventLoop::quit()
+{
+    isQuit = true;
+}
+
+void EventLoop::updateEvent(Event *ev)
+{
+    assert(ev->ownerLoop() == this);
+    assertInLoopThread();
+    e->updateEvent(ev);
 }
 
 } // namespace servant

@@ -6,22 +6,37 @@
 #ifndef EVENT_H
 #define EVENT_H
 
+#include <sys/epoll.h>
+
 namespace servant
 {
 
 class EventLoop;
 
-class EventHandler
+class Event
 {
 public:
-    typedef void (*Callback)();
-    EventHandler(EventLoop *loop, const int fd, int event)
-        :this->loop(loop),
-         this->fd(fd),
-         revents(event)
+    typedef void (*Callback)(int fd);
+    Event(EventLoop *_loop, int _fd)
+        : loop(_loop),
+          fd(_fd),
+          revents(0)
     { }
 
     void handleEvent();
+
+    void setRetEvents(int retEvents)
+    {
+        revents = retEvents;
+    }
+    int getEvents()
+    {
+        return events;
+    }
+    int getFd()
+    {
+        return fd;
+    }
 
     void setReadCallback(const Callback &cb)
     { readCallback = cb; }
@@ -32,29 +47,31 @@ public:
 
     void enableRead()
     {
-        revents |= (POLLIN | POLLPRI);
+        events |= (EPOLLIN | EPOLLPRI);
         update();
     }
     void enableWrite()
     {
-        revents |= POLLOUT;
+        events |= EPOLLOUT;
         update();
     }
     void disableWrite()
     {
-        revents &= ~POLLOUT;
+        events &= ~EPOLLOUT;
         update();
     }
-    
-    int fd() const 
-    { return fd; }
+    EventLoop* ownerLoop()
+    {
+        return loop;
+    }
     
 private:
     void update();
     
     EventLoop *loop;
-    const int fd;
-    int revents;
+    int fd;
+    int events;   // 注册感兴趣的事件，由用户设置
+    int revents;  // epoll_wait()调用返回的事件，由内核填写
 
     Callback readCallback;
     Callback writeCallback;

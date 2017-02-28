@@ -46,7 +46,7 @@ void Epoll::updateEvent(Event *ev)
     epoll_event event;
     event.data.fd = ev->getFd();
     event.events = ev->getEvents();
-    ::epoll_ctl(epollfd, EPOLL_CTL_ADD, ev->getFd(), &event);
+    ::epoll_ctl(epollfd, EPOLL_CTL_MOD, ev->getFd(), &event);
 }
 
 } // namespace servant

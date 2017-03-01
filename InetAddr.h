@@ -6,7 +6,6 @@
 #ifndef INETADDR_H
 #define INETADDR_H
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <string>
 
 namespace servant
@@ -15,8 +14,9 @@ namespace servant
 class InetAddr 
 {
 public:
+    explicit InetAddr(const uint16_t port);
     // 参数ip为点分十进制表示的ip地址
-    InetAddr(const std::string &ip, uint16_t port);
+    InetAddr(const std::string &ip, const uint16_t port);
     InetAddr(const struct sockaddr_in &addr): _addr(addr)
     { }
     const struct sockaddr_in& getSockAddrInet() const { return _addr; }

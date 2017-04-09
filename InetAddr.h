@@ -5,6 +5,7 @@
 
 #ifndef INETADDR_H
 #define INETADDR_H
+
 #include <netinet/in.h>
 #include <string>
 
@@ -20,6 +21,10 @@ public:
     InetAddr(const struct sockaddr_in &addr): _addr(addr)
     { }
     const struct sockaddr_in& getSockAddrInet() const { return _addr; }
+    void setSockAddrInet(const sockaddr_in &addr)
+    {
+        _addr = addr;
+    }
 private:
     struct sockaddr_in _addr;
 };

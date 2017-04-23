@@ -21,7 +21,7 @@ void Epoll::epoll(std::vector<Event*> &activeEvents)
         if(errno != EINTR)
         {   // FIXME: 调用日志库写入日志并终止程序
             std::cout << "Epoll::epoll() error: " << ::strerror(errno) << std::endl;
-            assert(numEvents >= 0);
+            exit(1);
         }
     }
     else if(numEvents == 0) 

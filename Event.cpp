@@ -14,13 +14,13 @@ void Event::handleEvent()
 {
     if(revents & (EPOLLIN | EPOLLPRI | EPOLLRDHUP))
         if(readCallback)
-            readCallback(fd);
+            readCallback();
     if(revents & EPOLLOUT)
         if(writeCallback)
-            writeCallback(fd);
+            writeCallback();
     if(revents & EPOLLERR)
         if(errorCallback)
-            errorCallback(fd);
+            errorCallback();
 }
 
 void Event::update()

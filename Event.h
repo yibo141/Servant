@@ -16,7 +16,7 @@ class EventLoop;
 class Event
 {
 public:
-    typedef void (*Callback)(int fd);
+    typedef void (*Callback)();
     Event(EventLoop *_loop, int _fd)
         : loop(_loop),
           fd(_fd),

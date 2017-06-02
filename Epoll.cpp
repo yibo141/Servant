@@ -3,7 +3,6 @@
  * E-mail: yibo141@outlook.com
  */
 
-#include <sys/epoll.h>
 #include "Epoll.h"
 #include "Event.h"
 
@@ -43,6 +42,8 @@ void Epoll::epoll(std::vector<Event*> &activeEvents)
 
 void Epoll::updateEvent(Event *ev)
 {
+    // 确保在拥有此Event的线程更新Event
+    assert(ev->ownerLoop == this->ownerLoop);
     epoll_event event;
     event.data.fd = ev->getFd();
     event.events = ev->getEvents();

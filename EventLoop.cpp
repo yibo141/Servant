@@ -53,7 +53,7 @@ void EventLoop::loop()
     {
         activeEvents.clear();
         e->epoll(activeEvents);
-        for(std::vector<Event*>:: iterator iter = activeEvents.begin();
+        for(std::vector<Event*>::iterator iter = activeEvents.begin();
             iter != activeEvents.end(); ++iter)
         {
             (*iter)->handleEvent();

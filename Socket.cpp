@@ -4,77 +4,62 @@
  */
 
 #include "Socket.h"
-#include "InetAddr.h"
-#include <cstring>
-#include <iostream>
-#include <fcntl.h>
-#include <errno.h>
 
-namespace servant
+void Socket::setReuseAddr(const int fd, bool on)
 {
-
-void Socket::bindAddr(const InetAddr *addr)
-{
-    bind(_socketfd, addr.getSockAddrInet());
+    int optval = on ? 1 : 0;
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+                     &optval, sizeof(optval));
 }
 
-void Socket::listen()
+void Socket::setTcpNoDelay(const int fd, bool on)
 {
-    listen(_socketfd);
+    int optval = on ? 1 : 0;
+    setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 }
 
-int Socket::accept(InetAddr *peerAddr)
+int Socket::createSocket()
 {
-    struct sockaddr_in addr;
-    ::memset(&addr, 0, sizeof(addr));
-    int connfd = accept(_socketfd, &addr);
-    if(connfd >= 0)
-    {
-        peeraddr->setSockAddrInet(addr);
-    }
-    return connfd;
-}
-
-int Socket::createNonblock()
-{
-    int sockfd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(sockfd < 0)
     {
         // FIXME: 写入日志
-        std::cout << "Socket::createNonblock error" << std::endl;
+        std::cout << "Socket::createNonblock error: " << strerror(errno) << std::endl;
         exit(1);
     }
-    setNonBlockAndCloseOnExec(sockfd);
+    // setNonBlockAndCloseOnExec(sockfd);
     return sockfd;  
 }
 
-void Socket::bind(int sockfd, struct sockaddr_in &addr)
+void Socket::Bind(const int sockfd, const struct sockaddr_in &addr)
 {
-    int ret = ::bind(sockfd, static_cast<struct sockaddr*>(addr), sizeof(addr));
+    int ret = bind(sockfd, (struct sockaddr*)(&addr), sizeof(addr));
     if(ret < 0) 
     {
-        std::cout << "Socket::bind error" << std::endl;
+        std::cout << "Socket::bind error: " << strerror(errno) << std::endl;
         exit(1);
     }
 }
 
-void Socket::listen(int sockfd)
+void Socket::Listen(const int sockfd)
 {
-    if(::listen(sockfd, 15) < 0)
+    if(listen(sockfd, 5) < 0)
     {
-        std::cout << "Socket::listen error" << endl;
+        std::cout << "Socket::listen error: " << strerror(errno) << std::endl;
         exit(1);
     }
 }
 
-int Socket::accept(int sockfd, struct sockaddr_in *addr)
+int Socket::Accept(const int sockfd, struct sockaddr_in *addr)
 {
-    socklen_t addrlen = sizeof(*addr);
-    int connfd = ::accept(sockfd, static_cast<struct sockaddr*>(addr), &addrlen);
-    setNonBlockAndCloseOnExec(connfd);
+    socklen_t addrLen = sizeof(*addr);
+    // int connfd = accept(sockfd, (struct sockaddr*)&addr, &addrLen);
+    // setNonBlockAndCloseOnExec(connfd);
+    int connfd = accept4(sockfd, (struct sockaddr*)&addr, 
+                         &addrLen, SOCK_NONBLOCK | SOCK_CLOEXEC);
+
     if(connfd < 0)
     {
-        std::cout << "Socket::accept error" << std::endl;
         switch(errno)
         {
             // 非致命错误，忽略
@@ -88,12 +73,12 @@ int Socket::accept(int sockfd, struct sockaddr_in *addr)
             case EINVAL:
             case ENFILE:
             case ENOMEM:
-                std::cout << "Socket::accept error" << errno << std::endl;
+                std::cout << "Socket::accept error: " << strerror(errno) << std::endl;
                 exit(1);
                 break;
             // 未知错误，退出程序
             default:
-                std::cout << "Socket::accept error" << errno << std::endl;
+                std::cout << "Socket::accept error: " << strerror(errno) << std::endl;
                 exit(1);
                 break;
         }
@@ -101,24 +86,35 @@ int Socket::accept(int sockfd, struct sockaddr_in *addr)
     return connfd;
 }
 
-void Socket::close(int sockfd)
+void Socket::Close(const int sockfd)
 {
-    if(::close(sockfd) < 0)
+    if(close(sockfd) < 0)
     {
-        std::cout << "Socket::close error" << std::endl;
+        std::cout << "Socket::close error: " << strerror(errno) << std::endl;
         exit(1);
     }
 }
 
-void Socket::setNonBlockAndCloseOnExec(int sockfd)
+void Socket::setNonBlockAndCloseOnExec(const int sockfd)
 {
-    int flags = ::fcntl(sockfd, F_GETFL, 0);
+    // 这段代码有问题，一直无法成功执行(Bad file descriptor)，并且
+    // fcntl函数返回-1，不知道为什么。所以用到这个函数的地方就用别的方法
+    // 替代了，如socket和accpet4。
+    /*
+    int flags;
+    if((flags = fcntl(sockfd, F_GETFL, 0)) < 0)
+    {
+        std::cout << "Socket::setNonBlockAndCloseOnExec error: " <<
+                    strerror(errno) << std::endl;
+        exit(1);
+    }
     flags |= O_NONBLOCK;
-    int ret = ::fcntl(sockfd, F_SETFL, flags);
-
-    flags = ::fcntl(sockfd, F_GETFD, 0);
     flags |= FD_CLOEXEC;
-    ret = ::fcntl(sockfd, F_SETFD, flags);
+    if(fcntl(sockfd, F_SETFL, flags) < 0)
+    {
+        std::cout << "Socket::setNonBlockAndCloseOnExec error: " <<
+                    strerror(errno) << std::endl;
+        exit(1);
+    }
+    */
 }
-
-} // servant

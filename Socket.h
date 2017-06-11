@@ -11,47 +11,29 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
-
-namespace servant
-{
+#include <sys/socket.h>
+#include <cstring>
+#include <iostream>
+#include <fcntl.h>
+#include <errno.h>
+#include <netinet/tcp.h>
 
 class InetAddr;
 class Socket 
 {
 public:
-    explicit Socket(int socketfd): _socketfd { }
-
-    ~Socket() 
-    { close(_socketfd); }
-
-    int fd()
-    { return _socketfd; }
-
-    void bindAddr(const InetAddr *addr);
-
-    void listen();
-
-    int accept(InetAddr *peerAddr);
-
     // 是否开启SO_REUSEADDR选项
-    void setReuseAddr(bool on)
-    {
-        int optval = on ? 1 : 0;
-        ::setsockopt(_socketfd, SOL_SOCKET, SO_REUSEADDR,
-                     &optval, sizeof(optval));
-    }
+    static void setReuseAddr(const int fd, bool on);
+
+    static void setTcpNoDelay(const int fd, bool on);
 
     // socket相关操作
-    static int createNonblock();
-    static void bind(int sockfd, struct sockaddr_in &addr);
-    static void listen(int sockfd);
-    static int accept(int sockfd, struct sockaddr_in *addr);
-    static void close(int sockfd);
-    static void setNonBlockAndCloseOnExec(int sockfd);
-private:
-    const int _socketfd;
+    static int createSocket();
+    static void Bind(const int sockfd, const struct sockaddr_in &addr);
+    static void Listen(const int sockfd);
+    static int Accept(const int sockfd, struct sockaddr_in *addr);
+    static void Close(const int sockfd);
+    static void setNonBlockAndCloseOnExec(const int sockfd);
 };
-
-} // namespace servant
 
 #endif // SOCKET_H

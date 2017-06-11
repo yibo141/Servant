@@ -7,18 +7,16 @@
 #define THREAD_H
 
 #include <pthread.h>
-
-namespace servant
-{
+#include <iostream>
 
 class Thread 
 {
 public:
     typedef void* (*ThreadFunc)(void*);
-    explicit Thread(ThreadFunc func)
+    explicit Thread(ThreadFunc func, void *arg)
         :started(false),
          joined(false),
-         tid(0),
+         _arg(arg),
          threadFunc(func)
     { }
 
@@ -31,16 +29,14 @@ public:
     void start();
     int join();
     bool isStarted() { return started; }
-    pid_t gettid() { return tid; }
+    pthread_t gettid() { return pthreadId; }
 
 private:
     bool started;
     bool joined;
+    void *_arg;
     pthread_t pthreadId;
-    pid_t tid;
     ThreadFunc threadFunc;
 };
-
-}
 
 #endif // THREAD_H

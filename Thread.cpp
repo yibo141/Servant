@@ -7,15 +7,13 @@
 #include <assert.h>
 #include "Thread.h"
 
-namespace servant
-{
-
 void Thread::start()
 {
     assert(!started);
     started = true;
-    if(pthread_create(&pthreadId, NULL, threadFunc, NULL))
+    if(pthread_create(&pthreadId, NULL, threadFunc, _arg))
         started = false;
+    std::cout << "----------Thread created----------" << std::endl;
 }
 
 int Thread::join()
@@ -24,5 +22,3 @@ int Thread::join()
     joined = true;
     return pthread_join(pthreadId, NULL);
 }
-
-} // namespace servant

@@ -3,32 +3,19 @@
  * E-mail: yibo141@outlook.com
  */
 
-#include <assert.h>
-#include <poll.h>
-#include <signal.h>
-#include <assert.h>
-#include "CurrentThread.h"
 #include "EventLoop.h"
-#include "Event.h"
-#include "Epoll.h"
 
-namespace 
+class IgnoreSigPipe
 {
-    class IgnoreSigPipe
+public:
+    IgnoreSigPipe()
     {
-    public:
-        IgnoreSigPipe()
-        {
-            ::signal(SIGPIPE, SIG_IGN);
-        }
-    };
+        signal(SIGPIPE, SIG_IGN);
+    }
+};
 
-    // 忽略SIGPIPE信号
-    IgnoreSigPipe initObj;
-}
-
-namespace servant
-{
+// 忽略SIGPIPE信号
+IgnoreSigPipe initObj;
 
 EventLoop::EventLoop()
     :isLooping(false),
@@ -45,18 +32,25 @@ EventLoop::~EventLoop()
 void EventLoop::loop()
 {
     assert(!isLooping);
-    assertInLoopThread();
     isLooping = true;
     isQuit = false;
 
     while(!isQuit)
     {
+        std::cout << "----------Looping----------" << std::endl;
+        addToLoop();
+        std::vector<Handler*> activeEvents;
         activeEvents.clear();
+        // 调用epoll将活动的套接字描述符对应的Handler取出并处理
         e->epoll(activeEvents);
-        for(std::vector<Event*>::iterator iter = activeEvents.begin();
+        for(std::vector<Handler*>::iterator iter = activeEvents.begin();
             iter != activeEvents.end(); ++iter)
         {
-            (*iter)->handleEvent();
+            std::cout << "----------Handle request----------" << std::endl;
+            // 处理客户端请求的入口
+            (*iter)->handle();
+            e->removeFd((*iter)->connFd());
+            delete *iter;
         }
     }
     isLooping = false;
@@ -67,11 +61,24 @@ void EventLoop::quit()
     isQuit = true;
 }
 
-void EventLoop::updateEvent(Event *ev)
+// 每次将一个套接字描述符添加到描述符数组中
+void EventLoop::addToLoop(const int fd)
 {
-    assert(ev->ownerLoop() == this);
-    assertInLoopThread();
-    e->updateEvent(ev);
+    // e->addToEpoll(fd);
+    std::cout << "----------Add " << fd << " to loop----------" << std::endl;
+    fds.push_back(fd);
 }
 
-} // namespace servant
+// 将描述符数组中的所有套接字全部添加到epoll中
+void EventLoop::addToLoop()
+{
+    if(fds.empty())
+    {
+        std::cout << "----------fds empty----------" << std::endl;
+        return;
+    }
+    for(int i = 0; i < fds.size(); ++i)
+        e->addToEpoll(fds[i]);
+    fds.clear();
+    std::cout << "----------Add all fd to loop----------" << std::endl;
+}

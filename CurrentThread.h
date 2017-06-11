@@ -10,17 +10,13 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-namespace servant
-{
-
 class CurrentThread 
 {
 public:
     static pid_t gettid()
     {
-        return static_cast<pid_t>(::syscall(SYS_gettid));
+        return static_cast<pid_t>(syscall(SYS_gettid));
     }
 };
 
-}
 #endif // CURRENTTHREAD_H

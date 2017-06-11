@@ -10,15 +10,12 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <vector>
-
+#include <poll.h>
+#include <signal.h>
+#include "Epoll.h"
 #include "CurrentThread.h"
 
-namespace servant
-{
-
-class Epoll;
-class Event;
-
+class Handler;
 class EventLoop 
 {
 public:
@@ -26,23 +23,15 @@ public:
     ~EventLoop();
     void loop();
     void quit();
-    void assertInLoopThread()
-    {
-        assert(isInLoopThread());
-    }
-    bool isInLoopThread() const 
-    {
-        return threadId == CurrentThread::gettid(); // ::syscall(SYS_gettid);
-    }
-    void updateEvent(Event *ev);
+    void addToLoop(const int fd);
 
 private:
+    void addToLoop();
     bool isLooping;
     const pid_t threadId;
+    std::vector<int> fds;
     bool isQuit;
     Epoll *e;
-    std::vector<Event*> activeEvents;
 };
 
-}
 #endif // EVENTLOOP_H

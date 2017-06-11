@@ -32,16 +32,17 @@ public:
     void append(const char *data, const size_t len)
     {
         makeSpace(len);
-        std::copy(data, data + len, beginWrite() + _writeIndex);
+        std::copy(data, data + len, beginWrite());
         _writeIndex += len;
     }
 
     char* peek() 
     {
-        return beginWrite() + _readIndex;
+        return static_cast<char*>(&*_buffer.begin()) + _readIndex;
     }
 
-    size_t readFd(int fd);
+    size_t readFd(const int fd);
+    void sendFd(const int fd);
     
 private:
     const char* begin() const 
@@ -50,7 +51,7 @@ private:
     }
     char* beginWrite()
     {
-        return &*_buffer.begin();
+        return &*_buffer.begin() + _writeIndex;
     }
     void resetBuffer()
     {

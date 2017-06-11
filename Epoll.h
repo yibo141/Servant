@@ -12,19 +12,16 @@
 #include <unistd.h>
 #include <iostream>
 #include <vector>
-#include "EventLoop.h"
+#include "Handler.h"
 
-namespace servant
-{
-
-class Event;
+class EventLoop;
 
 class Epoll 
 {
 public:
-    Epoll(EventLoop *loop)
+    explicit Epoll(EventLoop *loop)
         :ownerLoop(loop),
-         epollfd(::epoll_create1(EPOLL_CLOEXEC)),
+         epollfd(epoll_create1(EPOLL_CLOEXEC)),
          retEvents(8) // 初始时为epoll_wait预留8个返回的epoll_event
     { 
         // FIXME: 调用日志库写入日志并终止程序
@@ -34,28 +31,24 @@ public:
     }
 
     ~Epoll()
-    { ::close(epollfd); }
+    { close(epollfd); }
 
     // 调用epoll_wait，并将其交给Event类的handleEvent函数处理
-    void epoll(std::vector<Event*> &events);
-
-    // 修改epoll监听的事件
-    void updateEvent(Event &ev);
-    void removeEvent(const Event &ev);
-
+    void epoll(std::vector<Handler*> &events);
+    void removeFd(const int fd);
+    /*
     void assertInLoopThread() const 
     {
         ownerLoop->assertInLoopThread();
     }
-    void updateEvent(Event *ev);
-private:
-    
+    */
+    void addToEpoll(const int fd);
+
+private: 
     EventLoop *ownerLoop;
     int epollfd;
     std::vector<struct epoll_event> retEvents;
     // std::vector<Event> events;
 };
-
-}
 
 #endif // EPOLL_H

@@ -29,10 +29,10 @@ public:
     Parser(const std::string request);
     HTTPRequest getParseResult();
 private:
-    void parseLine();
-    void parseRequestLine();
-    void parseHeaders();
-    std::string _request;
+    void parseLine();        // 将请求按行解析存入_lines数组中
+    void parseRequestLine(); // 解析请求行
+    void parseHeaders();     // 解析头部字段
+    std::string _request;    // 客户的原始请求
     std::vector<std::string> _lines;
     HTTPRequest _parseResult;
 };

@@ -8,9 +8,6 @@
 
 #include <pthread.h>
 
-namespace servant 
-{
-
 class Mutex
 {
 public:
@@ -46,7 +43,7 @@ private:
 class MutexLock
 {
 public:
-    explicit MutexLock(Mutex &m): this->mutex(m)
+    explicit MutexLock(Mutex &m): mutex(m)
     {
         mutex.lock();
     }
@@ -59,7 +56,5 @@ public:
 private:
     Mutex mutex;
 };
-
-}
 
 #endif // MUTEX_H

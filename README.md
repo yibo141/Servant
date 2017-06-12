@@ -8,11 +8,11 @@
 
 # Usage
 
-$ make
+`$ make`
 
-$ ./Servant <port>
+`$ ./Servant <port>`
 
-$ make clean
+`$ make clean`
 
 **port**表示为端口号，比如8080.
 

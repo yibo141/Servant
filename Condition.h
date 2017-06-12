@@ -9,13 +9,10 @@
 #include <pthread.h>
 #include "Mutex.h"
 
-namespace servant
-{
-
 class Condition 
 {
 public:
-    Condition(Mutex &m): this->mutex(m)
+    Condition(Mutex &m): mutex(m)
     {
         pthread_cond_init(&cond, NULL);
     }
@@ -27,7 +24,7 @@ public:
 
     void wait() 
     {
-        pthread_cond_wait(&cond, mutex.getPthreadMutex());
+        pthread_cond_wait(&cond, &mutex.getPthreadMutex());
     }
 
     void notify()
@@ -44,7 +41,5 @@ private:
     Mutex mutex;
     pthread_cond_t cond;
 };
-
-}
 
 #endif // CONDITION_H

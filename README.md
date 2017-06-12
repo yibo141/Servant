@@ -52,4 +52,4 @@ Servant是一个简单的用C++写的基于Reactor模式的多线程HTTP服务�
 
 **test文件夹**是我的一些测试。
 
-### 更多详细信息请参考我的博客：(正在写)
+### 更多详细信息请参考[我的博客](http://www.cnblogs.com/broglie/p/5931375.html)。

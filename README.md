@@ -18,7 +18,7 @@
 
 # Detail
 
-Servant是一个简单的用C++写的基于Reactor模式的多线程HTTP服务器，暂时只支持静态页面。
+Servant是一个简单的用C++写的基于Reactor模式的多线程网络框架。
 
 各个文件的功能如下：
 
